@@ -80,7 +80,7 @@ exports.postCart = (req, res, next) => {
   const prodId = req.body.productId;
   let fetchedCart;
   let newQuantity = 1;
-  req.user.getCart()
+  req.session.user.getCart()
     .then(cart => {
       fetchedCart = cart;
       return cart.getProducts({ where: { id: prodId } })
@@ -117,7 +117,7 @@ exports.postCart = (req, res, next) => {
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  req.user.getCart()
+  req.session.user.getCart()
     .then(cart => {
       return cart.getProducts({ where: { id: prodId}});
     })
@@ -135,13 +135,13 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.postOrder = (req, res, next) => {
   let fetchedCart;
-  req.user.getCart()
+  req.session.user.getCart()
   .then(cart => {
     fetchedCart = cart;
     return cart.getProducts();
   })
   .then(products => {
-    return req.user.createOrder()
+    return req.session.user.createOrder()
     .then(order => {
       return order.addProducts(products.map(product => {
         products.orderItem = {quantity: product.cartItem.quantity}; // this orderItem is the anme of the model(exact)
@@ -164,7 +164,7 @@ exports.postOrder = (req, res, next) => {
 }
 
 exports.getOrders = (req, res, next) => {
-  req.user.getOrders({include: ['products']})
+  req.session.user.getOrders({include: ['products']})
   .then(orders => {
     res.render('shop/orders', {
       path: '/orders',
