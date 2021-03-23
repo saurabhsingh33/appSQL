@@ -40,7 +40,7 @@ exports.postLogin = (req, res, next) => {
     //
     const email = req.body.email;
     const password = req.body.password;
-    User.findAll({where : {
+    User.findOne({where : {
         email: email
     }})
         .then(user => {
@@ -49,7 +49,7 @@ exports.postLogin = (req, res, next) => {
                 return res.redirect('/login');
             }
             console.log(user);
-            bcrypt.compare(password, user[0].password)
+            bcrypt.compare(password, user.password)
             .then(result => {
                 //here result will be a boolean
                 if (result) {
@@ -113,7 +113,10 @@ exports.postSignup = (req, res, next) => {
                         password: hashedPassword
                     });
                 })
-                .then(result => {
+                .then(user => {
+                    return user.createCart();
+                })
+                .then(() => {
                     console.log('Redirecting to /login');
                     res.redirect('/login');
                 });

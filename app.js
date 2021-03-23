@@ -64,7 +64,7 @@ app.use((req, res, next) => {
     }
     User.findByPk(req.session.user.id)
     .then(user => {
-        req.user = user;
+        req.session.user = user;
         next();
     })
     .catch((err) => {
