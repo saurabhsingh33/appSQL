@@ -1,11 +1,19 @@
 const Product = require('../models/product');
+const alert = require('alert');
 
 exports.getAddProduct = (req, res, next) => {
+  let userName;
+  if (req.session.user) {
+    userName = req.session.user.name;
+  } else {
+    userName = '';
+  }
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
     editing: false,
-    isAuthenticated: req.session.isLoggedIn
+    isAuthenticated: req.session.isLoggedIn,
+    userName: userName
   });
 };
 
@@ -14,6 +22,11 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
+
+  if (!(title && imageUrl && price && description)) {
+    alert("Please enter all values");
+    res.redirect('/admin/add-product');
+  }
   //req.user.createProduct();
   Product.create({
     title: title,
@@ -35,13 +48,19 @@ exports.getEditProduct = (req, res, next) => {
     return res.redirect('/');
   }
   const prodId = req.params.productId;
-  req.user.getProducts({ where: { id: prodId } })
-  //Product.findAll({ where: { id: prodId } })
+  Product.findAll({ where: { id: prodId } })
+    //Product.findAll({ where: { id: prodId } })
     //Product.findByPk(prodId)
     .then(products => {
       const product = products[0];
       if (!product) {
         return res.redirect('/');
+      }
+      let userName;
+      if (req.session.user) {
+        userName = req.session.user.name;
+      } else {
+        userName = '';
       }
 
       res.render('admin/edit-product', {
@@ -49,7 +68,8 @@ exports.getEditProduct = (req, res, next) => {
         path: '/admin/edit-product',
         editing: editMode,
         product: product,
-        isAuthenticated: req.session.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn,
+        userName: userName
       })
     }).catch(err => {
       console.log(err);
@@ -85,11 +105,18 @@ exports.getProducts = (req, res, next) => {
   //req.session.user.getProducts()
   Product.findAll()
     .then(products => {
+      let userName;
+      if (req.session.user) {
+        userName = req.session.user.name;
+      } else {
+        userName = '';
+      }
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
         path: '/admin/products',
-        isAuthenticated: req.session.isLoggedIn
+        isAuthenticated: req.session.isLoggedIn,
+        userName: userName
       });
     }).catch(err => {
       console.log(err);
